@@ -59,11 +59,9 @@ class AuthController extends BaseController
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function me(Request $request): JsonResponse
+    public function me(): JsonResponse
     {
-        return $this->sendSuccessJson([
-            'user' => $request->user(),
-        ], 'Get profile.');
+        return $this->sendSuccessJson(Auth::user(), 'Get profile.');
     }
 
     /**
