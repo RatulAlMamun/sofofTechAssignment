@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
-class AuthController extends Controller
+class AuthController extends BaseController
 {
     /**
      * Registration Api
@@ -25,13 +25,10 @@ class AuthController extends Controller
         $user = User::create($data);
         $token =  $user->createToken('access_token', ['*'], now()->addDay())->plainTextToken;
 
-        return response()->json([
-            'message' => 'User registered successfully',
-            'data' => [
-                'token' => $token,
-                'user' => $user,
-            ],
-        ], 201);
+        return $this->sendSuccessJson([
+            'token' => $token,
+            'user' => $user,
+        ], 'User register successfully.', 201);
     }
 
     /**
@@ -42,19 +39,19 @@ class AuthController extends Controller
     public function login(LoginRequest $request): JsonResponse
     {
         if(!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json([
-                'message' => 'Unauthorized',
-            ], 401);
+            return $this->sendErrorJson(
+                'Unauthorized.',
+                ['error' => 'Invalid credentials'],
+                401
+            );
         }
         $user = Auth::user();
         $token = $user->createToken('access_token', ['*'], now()->addDay())->plainTextToken;
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Login successful.',
+        return $this->sendSuccessJson([
             'token' => $token,
-            'user' => $user,
-        ]);
+            'name' => $user->name,
+        ], 'Login successfully.');
     }
 
     /**
@@ -64,11 +61,9 @@ class AuthController extends Controller
      */
     public function me(Request $request): JsonResponse
     {
-        return response()->json([
-            'success' => true,
-            'message' => 'Logged in user.',
+        return $this->sendSuccessJson([
             'user' => $request->user(),
-        ]);
+        ], 'Get profile.');
     }
 
     /**
@@ -80,9 +75,6 @@ class AuthController extends Controller
     {
         $request->user()->tokens()->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Logout successful.',
-        ]);
+        return $this->sendSuccessJson(null, 'Logout successful.');
     }
 }
