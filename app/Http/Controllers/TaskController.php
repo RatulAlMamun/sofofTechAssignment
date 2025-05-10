@@ -15,9 +15,22 @@ class TaskController extends BaseController
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // 
+        $query = Task::with('assignedUsers')->where('user_id', Auth::id());
+
+        if ($request->has('status')) $query->where('status', $request->input('status'));
+        if ($request->has('priority')) $query->where('priority', $request->input('priority'));
+        if ($request->has('due_date')) $query->whereDate('due_date', $request->input('due_date'));
+
+        if ($request->has('sort')) {
+            $field = ltrim($request->input('sort'), '-');
+            $dir = str_starts_with($request->input('sort'), '-') ? 'DESC' : 'ASC';
+            $query->orderBy($field, $dir);
+        }
+
+        $tasks = $query->paginate(10);
+        return $this->sendSuccessJson($tasks, "All tasks.", 200);
     }
 
     /**

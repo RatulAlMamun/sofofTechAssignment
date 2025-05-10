@@ -15,6 +15,6 @@ Route::controller(AuthController::class)->group(function (){
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('tasks', TaskController::class)->except(['index']);;
+    Route::apiResource('tasks', TaskController::class);
     Route::post('tasks/{id}/assign', [TaskController::class, 'assign']);
 });
